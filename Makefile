@@ -1,4 +1,4 @@
-.PHONY: build run test migrate migration fmt restore
+.PHONY: build run test migrate migration fmt restore fe fe-build fe-install
 
 # Restore dependencies
 restore:
@@ -27,3 +27,15 @@ migrate:
 # Format code
 fmt:
 	dotnet format
+
+# Install frontend dependencies
+fe-install:
+	cd src/Frontend && npm install
+
+# Run Angular dev server
+fe:
+	cd src/Frontend && npx ng serve
+
+# Build frontend for production
+fe-build:
+	cd src/Frontend && npx ng build
