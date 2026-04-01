@@ -4,6 +4,7 @@ Gerenciador financeiro pessoal desenvolvido pelo time Animus.
 
 ## Tech Stack
 
+### Backend
 - .NET 10, ASP.NET Core Minimal APIs
 - Entity Framework Core 10 com PostgreSQL
 - ASP.NET Identity para autenticação (JWT Bearer)
@@ -12,6 +13,12 @@ Gerenciador financeiro pessoal desenvolvido pelo time Animus.
 - Scalar para documentação OpenAPI
 - xUnit + FluentAssertions para testes
 
+### Frontend
+- Angular 21 (standalone components, signals, zoneless)
+- TypeScript strict mode
+- SCSS para estilos
+- Vitest como test runner
+
 ## Estrutura do Projeto
 
 ```
@@ -19,7 +26,14 @@ src/
 ├── Api/              # Endpoints, middleware, configuração de DI
 ├── Application/      # Commands, queries, handlers, validators
 ├── Domain/           # Entidades, value objects, enums
-└── Infrastructure/   # EF Core, serviços externos
+├── Infrastructure/   # EF Core, serviços externos
+└── Frontend/         # Aplicação Angular
+    └── src/
+        └── app/
+            ├── core/         # Services, guards, interceptors
+            ├── features/     # Feature modules (lazy loaded)
+            ├── models/       # Interfaces e tipos (DTOs)
+            └── shared/       # Componentes reutilizáveis
 
 tests/
 ├── UnitTests/        # Testes de domínio e application
@@ -29,6 +43,7 @@ tests/
 ## Pré-requisitos
 
 - [.NET 10 SDK](https://dotnet.microsoft.com/download)
+- [Node.js 24+](https://nodejs.org/) e npm
 - [Docker](https://www.docker.com/) (para o PostgreSQL)
 
 ## Primeiros Passos
@@ -52,29 +67,44 @@ Isso inicia um container PostgreSQL na porta `5432` com as credenciais:
 ### 2. Aplicar migrations
 
 ```bash
-dotnet ef database update -p src/Infrastructure -s src/Api
+make migrate
 ```
 
-### 3. Rodar a API
+### 3. Instalar dependências do frontend
 
 ```bash
-dotnet run --project src/Api
+make fe-install
 ```
 
-A documentação da API estará disponível em:
-- OpenAPI: `http://localhost:5281/openapi/v1.json`
+### 4. Rodar a aplicação
+
+Em terminais separados:
+
+```bash
+# Terminal 1 — API (.NET)
+make run
+
+# Terminal 2 — Frontend (Angular)
+make fe
+```
+
+- Frontend: `http://localhost:4200`
+- API: `http://localhost:5281`
 - Scalar UI: `http://localhost:5281/scalar/v1`
 
 ## Comandos Úteis
 
 | Comando | Descrição |
 |---------|-----------|
-| `dotnet build` | Compilar a solução |
-| `dotnet test` | Executar todos os testes |
-| `dotnet run --project src/Api` | Rodar a API |
-| `dotnet ef migrations add <Nome> -p src/Infrastructure -s src/Api` | Criar migration |
-| `dotnet ef database update -p src/Infrastructure -s src/Api` | Aplicar migrations |
-| `dotnet format` | Formatar código |
+| `make build` | Compilar o backend |
+| `make run` | Rodar a API |
+| `make test` | Executar todos os testes |
+| `make migration name=Nome` | Criar migration |
+| `make migrate` | Aplicar migrations |
+| `make fmt` | Formatar código |
+| `make fe-install` | Instalar dependências do frontend |
+| `make fe` | Rodar o dev server Angular |
+| `make fe-build` | Build de produção do frontend |
 
 ## Git Workflow
 
