@@ -1,5 +1,6 @@
 using System.Text;
 using Aerarium.Api.Endpoints;
+using Aerarium.Api.Middleware;
 using Aerarium.Api.Services;
 using Aerarium.Application;
 using Aerarium.Application.Common;
@@ -46,6 +47,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 
 builder.Services.AddAuthorization();
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
 
 var app = builder.Build();
 
