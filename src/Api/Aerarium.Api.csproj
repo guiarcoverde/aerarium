@@ -7,7 +7,9 @@
 
   <ItemGroup>
     <PackageReference Include="Mediator.SourceGenerator" Version="3.0.2" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.5" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.5" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.5" PrivateAssets="all" />
     <PackageReference Include="Scalar.AspNetCore" Version="2.13.18" />
   </ItemGroup>
 
