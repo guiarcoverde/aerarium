@@ -56,4 +56,31 @@ public sealed class CreateTransactionValidatorTests
 
         result.ShouldHaveValidationErrorFor(x => x.Category);
     }
+
+    [Fact]
+    public void Validate_RecurringWithoutEndRule_HasError()
+    {
+        var command = new CreateTransactionCommand(
+            100m, "Test", new DateOnly(2026, 4, 1),
+            TransactionType.Income, TransactionCategory.Salary,
+            Recurrence.Monthly);
+
+        var result = _validator.TestValidate(command);
+
+        result.Errors.Should().Contain(e =>
+            e.ErrorMessage == "Recurring transactions must have either an end date or an occurrence count.");
+    }
+
+    [Fact]
+    public void Validate_NonRecurringWithEndDate_HasError()
+    {
+        var command = new CreateTransactionCommand(
+            100m, "Test", new DateOnly(2026, 4, 1),
+            TransactionType.Income, TransactionCategory.Salary,
+            Recurrence.None, RecurrenceEndDate: new DateOnly(2026, 12, 31));
+
+        var result = _validator.TestValidate(command);
+
+        result.ShouldHaveValidationErrorFor(x => x.RecurrenceEndDate);
+    }
 }

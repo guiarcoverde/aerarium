@@ -2,6 +2,7 @@ namespace Aerarium.UnitTests.Application.Transactions;
 
 using Aerarium.Application.Common;
 using Aerarium.Application.Transactions.Create;
+using Aerarium.Domain.Common;
 using Aerarium.Domain.Entities;
 using Aerarium.Domain.Enums;
 using FluentAssertions;
@@ -13,6 +14,7 @@ public sealed class CreateTransactionHandlerTests
     private readonly IAppDbContext _dbContext = Substitute.For<IAppDbContext>();
     private readonly ICurrentUserService _currentUser = Substitute.For<ICurrentUserService>();
     private readonly ICategoryLocalizer _categoryLocalizer = Substitute.For<ICategoryLocalizer>();
+    private readonly IBusinessDayCalendar _calendar = Substitute.For<IBusinessDayCalendar>();
     private readonly CreateTransactionHandler _handler;
 
     public CreateTransactionHandlerTests()
@@ -23,7 +25,7 @@ public sealed class CreateTransactionHandlerTests
         var transactions = new List<Transaction>().BuildMockDbSet();
         _dbContext.Transactions.Returns(transactions);
 
-        _handler = new CreateTransactionHandler(_dbContext, _currentUser, _categoryLocalizer);
+        _handler = new CreateTransactionHandler(_dbContext, _currentUser, _categoryLocalizer, _calendar);
     }
 
     [Fact]
