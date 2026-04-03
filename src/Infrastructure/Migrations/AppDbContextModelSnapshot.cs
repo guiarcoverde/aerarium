@@ -46,6 +46,18 @@ namespace Aerarium.Infrastructure.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
 
+                    b.Property<int>("Recurrence")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("RecurrenceCount")
+                        .HasColumnType("integer");
+
+                    b.Property<DateOnly?>("RecurrenceEndDate")
+                        .HasColumnType("date");
+
+                    b.Property<Guid?>("RecurrenceGroupId")
+                        .HasColumnType("uuid");
+
                     b.Property<int>("Type")
                         .HasColumnType("integer");
 
@@ -58,6 +70,9 @@ namespace Aerarium.Infrastructure.Migrations
                         .HasColumnType("character varying(450)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("RecurrenceGroupId")
+                        .HasFilter("\"RecurrenceGroupId\" IS NOT NULL");
 
                     b.HasIndex("UserId");
 
