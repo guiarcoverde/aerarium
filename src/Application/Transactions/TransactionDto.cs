@@ -10,5 +10,10 @@ public sealed record TransactionDto(
     TransactionType Type,
     TransactionCategory Category,
     string CategoryDisplayName,
+    Recurrence Recurrence,
+    Guid? RecurrenceGroupId,
+    DateOnly? RecurrenceEndDate,
+    int? RecurrenceCount,
+    SalaryScheduleDto? SalarySchedule,
     DateTime CreatedAt,
     DateTime? UpdatedAt);

@@ -114,4 +114,126 @@ public sealed class TransactionEndpointTests(CustomWebApplicationFactory factory
 
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
     }
+
+    [Fact]
+    public async Task CreateTransaction_Recurring_CreatesMultipleLinked()
+    {
+        var client = await factory.CreateAuthenticatedClientAsync(userId: "recur-user", email: "recur@test.com");
+        var request = new
+        {
+            Amount = 500m,
+            Description = "Monthly rent",
+            Date = "2026-04-01",
+            Type = TransactionType.Expense,
+            Category = TransactionCategory.Housing,
+            Recurrence = Recurrence.Monthly,
+            RecurrenceCount = 3
+        };
+
+        var response = await client.PostAsJsonAsync("/api/transactions", request);
+
+        response.StatusCode.Should().Be(HttpStatusCode.Created);
+        var dto = await response.Content.ReadFromJsonAsync<TransactionDto>();
+        dto!.Recurrence.Should().Be(Recurrence.Monthly);
+        dto.RecurrenceGroupId.Should().NotBeNull();
+
+        var listResponse = await client.GetAsync("/api/transactions?page=1&pageSize=50");
+        var result = await listResponse.Content.ReadFromJsonAsync<PagedResult<TransactionDto>>();
+        var seriesItems = result!.Items.Where(t => t.RecurrenceGroupId == dto.RecurrenceGroupId).ToList();
+        seriesItems.Should().HaveCount(3);
+    }
+
+    [Fact]
+    public async Task DeleteSeries_RemovesAllOccurrences()
+    {
+        var client = await factory.CreateAuthenticatedClientAsync(userId: "del-series-user", email: "delseries@test.com");
+        var createResponse = await client.PostAsJsonAsync("/api/transactions", new
+        {
+            Amount = 100m,
+            Description = "Weekly gym",
+            Date = "2026-04-01",
+            Type = TransactionType.Expense,
+            Category = TransactionCategory.Health,
+            Recurrence = Recurrence.Weekly,
+            RecurrenceCount = 4
+        });
+
+        var created = await createResponse.Content.ReadFromJsonAsync<TransactionDto>();
+        var groupId = created!.RecurrenceGroupId;
+
+        var deleteResponse = await client.DeleteAsync($"/api/transactions/series/{groupId}");
+        deleteResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
+
+        var listResponse = await client.GetAsync("/api/transactions?page=1&pageSize=50");
+        var result = await listResponse.Content.ReadFromJsonAsync<PagedResult<TransactionDto>>();
+        result!.Items.Where(t => t.RecurrenceGroupId == groupId).Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task CreateTransaction_SalaryWithBusinessDaySchedule_GeneratesCorrectDates()
+    {
+        var client = await factory.CreateAuthenticatedClientAsync(userId: "sal-bd-user", email: "salbd@test.com");
+        var request = new
+        {
+            Amount = 5000m,
+            Description = "Monthly salary",
+            Date = "2026-04-01",
+            Type = TransactionType.Income,
+            Category = TransactionCategory.Salary,
+            Recurrence = Recurrence.Monthly,
+            RecurrenceCount = 3,
+            SalarySchedule = new
+            {
+                Mode = SalaryScheduleMode.BusinessDay,
+                BusinessDayNumber = 5
+            }
+        };
+
+        var response = await client.PostAsJsonAsync("/api/transactions", request);
+
+        response.StatusCode.Should().Be(HttpStatusCode.Created);
+        var dto = await response.Content.ReadFromJsonAsync<TransactionDto>();
+        dto!.SalarySchedule.Should().NotBeNull();
+        dto.SalarySchedule!.Mode.Should().Be(SalaryScheduleMode.BusinessDay);
+
+        var listResponse = await client.GetAsync("/api/transactions?page=1&pageSize=50");
+        var result = await listResponse.Content.ReadFromJsonAsync<PagedResult<TransactionDto>>();
+        var seriesItems = result!.Items.Where(t => t.RecurrenceGroupId == dto.RecurrenceGroupId).ToList();
+        seriesItems.Should().HaveCount(3);
+    }
+
+    [Fact]
+    public async Task CreateTransaction_SalarySplit_GeneratesDoubleTransactions()
+    {
+        var client = await factory.CreateAuthenticatedClientAsync(userId: "sal-split-user", email: "salsplit@test.com");
+        var request = new
+        {
+            Amount = 10000m,
+            Description = "Split salary",
+            Date = "2026-04-01",
+            Type = TransactionType.Income,
+            Category = TransactionCategory.Salary,
+            Recurrence = Recurrence.Monthly,
+            RecurrenceCount = 2,
+            SalarySchedule = new
+            {
+                Mode = SalaryScheduleMode.FixedDateSplit,
+                FixedDay = 15,
+                SplitFirstPercentage = 40m
+            }
+        };
+
+        var response = await client.PostAsJsonAsync("/api/transactions", request);
+
+        response.StatusCode.Should().Be(HttpStatusCode.Created);
+
+        var listResponse = await client.GetAsync("/api/transactions?page=1&pageSize=50");
+        var result = await listResponse.Content.ReadFromJsonAsync<PagedResult<TransactionDto>>();
+        var dto = (await response.Content.ReadFromJsonAsync<TransactionDto>())!;
+        var seriesItems = result!.Items.Where(t => t.RecurrenceGroupId == dto.RecurrenceGroupId).ToList();
+        // 2 months × 2 payments = 4 transactions
+        seriesItems.Should().HaveCount(4);
+        seriesItems.Should().Contain(t => t.Amount == 4000m);
+        seriesItems.Should().Contain(t => t.Amount == 6000m);
+    }
 }

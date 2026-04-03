@@ -29,8 +29,23 @@ public sealed class TransactionConfiguration : IEntityTypeConfiguration<Transact
         builder.Property(t => t.Category)
             .HasConversion<int>();
 
+        builder.Property(t => t.Recurrence)
+            .HasConversion<int>();
+
         builder.HasIndex(t => t.UserId);
 
         builder.HasIndex(t => new { t.UserId, t.Date });
+
+        builder.HasIndex(t => t.RecurrenceGroupId)
+            .HasFilter("\"RecurrenceGroupId\" IS NOT NULL");
+
+        builder.OwnsOne(t => t.SalarySchedule, sa =>
+        {
+            sa.Property(s => s.Mode).HasConversion<int>();
+            sa.Property(s => s.BusinessDayNumber);
+            sa.Property(s => s.FixedDay);
+            sa.Property(s => s.SplitFirstAmount).HasPrecision(18, 2);
+            sa.Property(s => s.SplitFirstPercentage).HasPrecision(5, 2);
+        });
     }
 }
