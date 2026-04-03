@@ -1,8 +1,10 @@
 namespace Aerarium.Infrastructure;
 
 using Aerarium.Application.Common;
+using Aerarium.Domain.Common;
 using Aerarium.Infrastructure.Auth;
 using Aerarium.Infrastructure.Persistence;
+using Aerarium.Infrastructure.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -20,6 +22,7 @@ public static class DependencyInjection
         services.AddScoped<IAppDbContext>(sp => sp.GetRequiredService<AppDbContext>());
 
         services.AddSingleton<ITokenService, TokenService>();
+        services.AddSingleton<IBusinessDayCalendar, BrazilianBusinessDayCalendar>();
 
         services.AddIdentityCore<IdentityUser>(options =>
             {
