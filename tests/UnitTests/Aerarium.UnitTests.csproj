@@ -21,6 +21,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Domain\Aerarium.Domain.csproj" />
     <ProjectReference Include="..\..\src\Application\Aerarium.Application.csproj" />
+    <ProjectReference Include="..\..\src\Infrastructure\Aerarium.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>
