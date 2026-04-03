@@ -27,12 +27,23 @@ public sealed class UpdateTransactionHandler(
             command.Description,
             command.Date,
             command.Type,
-            command.Category);
+            command.Category,
+            command.Recurrence,
+            command.RecurrenceEndDate,
+            command.RecurrenceCount,
+            command.SalarySchedule);
 
         if (result.IsFailure)
             return Result<TransactionDto>.Failure(result.Error!);
 
         await dbContext.SaveChangesAsync(cancellationToken);
+
+        var salaryDto = transaction.SalarySchedule is not null
+            ? new SalaryScheduleDto(
+                transaction.SalarySchedule.Mode, transaction.SalarySchedule.BusinessDayNumber,
+                transaction.SalarySchedule.FixedDay, transaction.SalarySchedule.SplitFirstAmount,
+                transaction.SalarySchedule.SplitFirstPercentage)
+            : null;
 
         return new TransactionDto(
             transaction.Id,
@@ -42,6 +53,11 @@ public sealed class UpdateTransactionHandler(
             transaction.Type,
             transaction.Category,
             categoryLocalizer.GetDisplayName(transaction.Category),
+            transaction.Recurrence,
+            transaction.RecurrenceGroupId,
+            transaction.RecurrenceEndDate,
+            transaction.RecurrenceCount,
+            salaryDto,
             transaction.CreatedAt,
             transaction.UpdatedAt);
     }

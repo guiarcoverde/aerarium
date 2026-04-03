@@ -26,6 +26,28 @@ public sealed class UpdateTransactionValidator : AbstractValidator<UpdateTransac
         RuleFor(x => x.Category)
             .Must((cmd, category) => IsValidCategoryForType(cmd.Type, category))
             .WithMessage("Category is not valid for the given transaction type.");
+
+        RuleFor(x => x.Recurrence)
+            .IsInEnum();
+
+        When(x => x.Recurrence != Recurrence.None, () =>
+        {
+            RuleFor(x => x)
+                .Must(x => x.RecurrenceEndDate is not null || x.RecurrenceCount is not null)
+                .WithMessage("Recurring transactions must have either an end date or an occurrence count.");
+        });
+
+        When(x => x.Recurrence == Recurrence.None, () =>
+        {
+            RuleFor(x => x.RecurrenceEndDate).Null()
+                .WithMessage("Non-recurring transactions cannot have an end date.");
+            RuleFor(x => x.RecurrenceCount).Null()
+                .WithMessage("Non-recurring transactions cannot have an occurrence count.");
+        });
+
+        RuleFor(x => x.RecurrenceCount)
+            .GreaterThan(0)
+            .When(x => x.RecurrenceCount is not null);
     }
 
     private static bool IsValidCategoryForType(TransactionType type, TransactionCategory category)

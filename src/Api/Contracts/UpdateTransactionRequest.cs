@@ -7,4 +7,8 @@ public sealed record UpdateTransactionRequest(
     string Description,
     DateOnly Date,
     TransactionType Type,
-    TransactionCategory Category);
+    TransactionCategory Category,
+    Recurrence Recurrence = Recurrence.None,
+    DateOnly? RecurrenceEndDate = null,
+    int? RecurrenceCount = null,
+    SalaryScheduleRequest? SalarySchedule = null);

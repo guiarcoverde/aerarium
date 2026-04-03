@@ -2,6 +2,7 @@ namespace Aerarium.Application.Transactions.Update;
 
 using Aerarium.Domain.Common;
 using Aerarium.Domain.Enums;
+using Aerarium.Domain.ValueObjects;
 using Mediator;
 
 public sealed record UpdateTransactionCommand(
@@ -10,4 +11,8 @@ public sealed record UpdateTransactionCommand(
     string Description,
     DateOnly Date,
     TransactionType Type,
-    TransactionCategory Category) : ICommand<Result<TransactionDto>>;
+    TransactionCategory Category,
+    Recurrence Recurrence = Recurrence.None,
+    DateOnly? RecurrenceEndDate = null,
+    int? RecurrenceCount = null,
+    SalarySchedule? SalarySchedule = null) : ICommand<Result<TransactionDto>>;
