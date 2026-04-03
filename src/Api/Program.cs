@@ -15,6 +15,7 @@ builder.Services.AddOpenApi();
 builder.Services.AddLocalization();
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddMediator(options => options.ServiceLifetime = ServiceLifetime.Scoped);
 
 builder.Services.AddCors(options =>
 {
@@ -56,10 +57,14 @@ app.MapOpenApi();
 app.MapScalarApiReference();
 
 app.UseCors();
+app.UseRequestLocalization("pt-BR", "en");
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapAuthEndpoints();
+app.MapTransactionEndpoints();
+app.MapDashboardEndpoints();
+app.MapCategoryEndpoints();
 
 app.Run();
 

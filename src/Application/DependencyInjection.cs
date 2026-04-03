@@ -14,7 +14,7 @@ public static class DependencyInjection
 
         services.AddTransient<ICategoryLocalizer, CategoryLocalizer>();
 
-        services.AddSingleton(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+        services.AddScoped(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
 
         return services;
     }
