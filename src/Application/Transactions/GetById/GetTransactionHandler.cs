@@ -2,6 +2,7 @@ namespace Aerarium.Application.Transactions.GetById;
 
 using Aerarium.Application.Common;
 using Aerarium.Domain.Common;
+using Aerarium.Domain.ValueObjects;
 using Mediator;
 using Microsoft.EntityFrameworkCore;
 
@@ -31,7 +32,20 @@ public sealed class GetTransactionHandler(
             transaction.Type,
             transaction.Category,
             categoryLocalizer.GetDisplayName(transaction.Category),
+            transaction.Recurrence,
+            transaction.RecurrenceGroupId,
+            transaction.RecurrenceEndDate,
+            transaction.RecurrenceCount,
+            MapSalarySchedule(transaction.SalarySchedule),
             transaction.CreatedAt,
             transaction.UpdatedAt);
+    }
+
+    private static SalaryScheduleDto? MapSalarySchedule(SalarySchedule? schedule)
+    {
+        if (schedule is null) return null;
+        return new SalaryScheduleDto(
+            schedule.Mode, schedule.BusinessDayNumber, schedule.FixedDay,
+            schedule.SplitFirstAmount, schedule.SplitFirstPercentage);
     }
 }

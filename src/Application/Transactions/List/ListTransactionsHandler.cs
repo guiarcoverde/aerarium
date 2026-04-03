@@ -46,6 +46,14 @@ public sealed class ListTransactionsHandler(
                 t.Type,
                 t.Category,
                 categoryLocalizer.GetDisplayName(t.Category),
+                t.Recurrence,
+                t.RecurrenceGroupId,
+                t.RecurrenceEndDate,
+                t.RecurrenceCount,
+                t.SalarySchedule != null ? new SalaryScheduleDto(
+                    t.SalarySchedule.Mode, t.SalarySchedule.BusinessDayNumber,
+                    t.SalarySchedule.FixedDay, t.SalarySchedule.SplitFirstAmount,
+                    t.SalarySchedule.SplitFirstPercentage) : null,
                 t.CreatedAt,
                 t.UpdatedAt))
             .ToList();
