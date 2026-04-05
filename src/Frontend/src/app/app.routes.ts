@@ -6,7 +6,16 @@ export const routes: Routes = [
     path: '',
     canActivate: [authGuard],
     loadComponent: () =>
-      import('./features/auth/components/home/home').then((m) => m.Home),
+      import('./features/layout/layout').then((m) => m.Layout),
+    children: [
+      {
+        path: '',
+        loadComponent: () =>
+          import('./features/dashboard/components/dashboard/dashboard').then(
+            (m) => m.Dashboard,
+          ),
+      },
+    ],
   },
   {
     path: 'login',
@@ -18,7 +27,9 @@ export const routes: Routes = [
     path: 'register',
     canActivate: [guestGuard],
     loadComponent: () =>
-      import('./features/auth/components/register/register').then((m) => m.Register),
+      import('./features/auth/components/register/register').then(
+        (m) => m.Register,
+      ),
   },
   {
     path: '**',

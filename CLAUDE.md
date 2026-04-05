@@ -211,6 +211,7 @@ Aerarium is a personal financial manager web application built by the Animus tea
 ## Git Workflow
 - Branch naming: `feature/`, `bugfix/`, `hotfix/`
 - Commit format: `type: description` (feat, fix, refactor, test, docs)
+- Commits should always be grouped
 - Always create a branch before changes
 - Run tests before committing
 
