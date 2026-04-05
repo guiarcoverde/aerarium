@@ -1,0 +1,77 @@
+<div class="dashboard">
+  <header class="dashboard-header">
+    <h2>Dashboard</h2>
+    <div class="month-picker">
+      <button class="month-btn" (click)="previousMonth()" aria-label="Previous month">&lt;</button>
+      <span class="month-label">{{ monthName }} {{ year() }}</span>
+      <button class="month-btn" (click)="nextMonth()" aria-label="Next month">&gt;</button>
+    </div>
+  </header>
+
+  @if (error()) {
+    <div class="error-banner">{{ error() }}</div>
+  }
+
+  @if (loading()) {
+    <div class="loading">Loading...</div>
+  }
+
+  @if (summary(); as s) {
+    <div class="summary-cards">
+      <div class="card card--income">
+        <span class="card-label">Income</span>
+        <span class="card-value">{{ s.totalIncome | currency: 'BRL' : 'symbol' : '1.2-2' }}</span>
+      </div>
+      <div class="card card--expense">
+        <span class="card-label">Expenses</span>
+        <span class="card-value">{{ s.totalExpenses | currency: 'BRL' : 'symbol' : '1.2-2' }}</span>
+      </div>
+      <div class="card card--balance">
+        <span class="card-label">Balance</span>
+        <span class="card-value">{{ s.balance | currency: 'BRL' : 'symbol' : '1.2-2' }}</span>
+      </div>
+    </div>
+
+    <div class="breakdowns">
+      <section class="breakdown">
+        <h3>Income by Category</h3>
+        @if (s.incomeByCategory.length === 0) {
+          <p class="empty">No income this month</p>
+        }
+        @for (item of s.incomeByCategory; track item.category) {
+          <div class="breakdown-item">
+            <div class="breakdown-info">
+              <span class="breakdown-name">{{ item.categoryDisplayName }}</span>
+              <span class="breakdown-amount">{{ item.total | currency: 'BRL' : 'symbol' : '1.2-2' }}</span>
+            </div>
+            <div class="breakdown-bar">
+              <div class="breakdown-bar-fill breakdown-bar-fill--income"
+                [style.width.%]="barWidth(item, s.incomeByCategory)"></div>
+            </div>
+            <span class="breakdown-count">{{ item.count }} transaction{{ item.count !== 1 ? 's' : '' }}</span>
+          </div>
+        }
+      </section>
+
+      <section class="breakdown">
+        <h3>Expenses by Category</h3>
+        @if (s.expenseByCategory.length === 0) {
+          <p class="empty">No expenses this month</p>
+        }
+        @for (item of s.expenseByCategory; track item.category) {
+          <div class="breakdown-item">
+            <div class="breakdown-info">
+              <span class="breakdown-name">{{ item.categoryDisplayName }}</span>
+              <span class="breakdown-amount">{{ item.total | currency: 'BRL' : 'symbol' : '1.2-2' }}</span>
+            </div>
+            <div class="breakdown-bar">
+              <div class="breakdown-bar-fill breakdown-bar-fill--expense"
+                [style.width.%]="barWidth(item, s.expenseByCategory)"></div>
+            </div>
+            <span class="breakdown-count">{{ item.count }} transaction{{ item.count !== 1 ? 's' : '' }}</span>
+          </div>
+        }
+      </section>
+    </div>
+  }
+</div>
