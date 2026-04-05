@@ -47,9 +47,9 @@ public static class TransactionsEndpoints
             int? month,
             int? year,
             TransactionType? type,
-            int page,
-            int pageSize,
-            IMediator mediator) =>
+            int page = 1,
+            int pageSize = 10,
+            IMediator mediator = default!) =>
         {
             var query = new ListTransactionsQuery(month, year, type, page, pageSize);
             var result = await mediator.Send(query);
