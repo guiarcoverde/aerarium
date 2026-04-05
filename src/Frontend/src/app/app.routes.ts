@@ -15,6 +15,13 @@ export const routes: Routes = [
             (m) => m.Dashboard,
           ),
       },
+      {
+        path: 'transactions/create',
+        loadComponent: () =>
+          import(
+            './features/transactions/components/create-transaction/create-transaction'
+          ).then((m) => m.CreateTransaction),
+      },
     ],
   },
   {

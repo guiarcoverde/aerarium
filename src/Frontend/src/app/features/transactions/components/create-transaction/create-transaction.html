@@ -1,0 +1,170 @@
+<div class="create-transaction">
+  <header class="page-header">
+    <h2>New Transaction</h2>
+  </header>
+
+  @if (success()) {
+    <div class="success-banner">Transaction created successfully!</div>
+  }
+  @if (error()) {
+    <div class="error-banner">{{ error() }}</div>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="tx-form">
+    <div class="form-row">
+      <div class="form-group">
+        <label for="type">Type</label>
+        <select id="type" formControlName="type">
+          <option [ngValue]="null" disabled>Select type</option>
+          <option [ngValue]="TransactionType.Income">Income</option>
+          <option [ngValue]="TransactionType.Expense">Expense</option>
+        </select>
+        @if (form.controls.type.touched && form.controls.type.hasError('required')) {
+          <span class="field-error">Type is required</span>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="category">Category</label>
+        <select id="category" formControlName="category">
+          <option [ngValue]="null" disabled>Select category</option>
+          @for (cat of filteredCategories(); track cat.value) {
+            <option [ngValue]="cat.value">{{ cat.label }}</option>
+          }
+        </select>
+        @if (form.controls.category.touched && form.controls.category.hasError('required')) {
+          <span class="field-error">Category is required</span>
+        }
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="description">Description</label>
+      <input id="description" type="text" formControlName="description" placeholder="e.g. Monthly rent payment">
+      @if (form.controls.description.touched && form.controls.description.hasError('required')) {
+        <span class="field-error">Description is required</span>
+      }
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="amount">Amount</label>
+        <input id="amount" type="number" formControlName="amount" placeholder="0.00" step="0.01" min="0.01">
+        @if (form.controls.amount.touched && form.controls.amount.hasError('required')) {
+          <span class="field-error">Amount is required</span>
+        } @else if (form.controls.amount.touched && form.controls.amount.hasError('min')) {
+          <span class="field-error">Amount must be greater than zero</span>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="date">Date</label>
+        <input id="date" type="date" formControlName="date">
+        @if (form.controls.date.touched && form.controls.date.hasError('required')) {
+          <span class="field-error">Date is required</span>
+        }
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="recurrence">Recurrence</label>
+      <select id="recurrence" formControlName="recurrence">
+        <option [ngValue]="Recurrence.None">None</option>
+        <option [ngValue]="Recurrence.Daily">Daily</option>
+        <option [ngValue]="Recurrence.Weekly">Weekly</option>
+        <option [ngValue]="Recurrence.Monthly">Monthly</option>
+        <option [ngValue]="Recurrence.Yearly">Yearly</option>
+      </select>
+    </div>
+
+    @if (showRecurrenceFields()) {
+      <div class="form-section">
+        <h3>Recurrence Settings</h3>
+        <p class="hint">Provide either an end date or an occurrence count.</p>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="recurrenceEndDate">End Date</label>
+            <input id="recurrenceEndDate" type="date" formControlName="recurrenceEndDate">
+          </div>
+          <div class="form-group">
+            <label for="recurrenceCount">Occurrences</label>
+            <input id="recurrenceCount" type="number" formControlName="recurrenceCount"
+              placeholder="e.g. 12" min="1" step="1">
+            @if (form.controls.recurrenceCount.touched && form.controls.recurrenceCount.hasError('min')) {
+              <span class="field-error">Must be at least 1</span>
+            }
+          </div>
+        </div>
+      </div>
+    }
+
+    @if (showSalarySchedule()) {
+      <div class="form-section">
+        <h3>Salary Schedule</h3>
+        <div class="form-group">
+          <label for="salaryScheduleMode">Mode</label>
+          <select id="salaryScheduleMode" formControlName="salaryScheduleMode">
+            <option [ngValue]="null" disabled>Select mode</option>
+            <option [ngValue]="SalaryScheduleMode.BusinessDay">Business Day</option>
+            <option [ngValue]="SalaryScheduleMode.FixedDate">Fixed Date</option>
+            <option [ngValue]="SalaryScheduleMode.FixedDateSplit">Fixed Date (Split)</option>
+          </select>
+        </div>
+
+        @switch (salaryMode()) {
+          @case (SalaryScheduleMode.BusinessDay) {
+            <div class="form-group">
+              <label for="businessDayNumber">Business Day Number (1-23)</label>
+              <input id="businessDayNumber" type="number" formControlName="businessDayNumber"
+                placeholder="e.g. 5" min="1" max="23" step="1">
+              @if (form.controls.businessDayNumber.touched && form.controls.businessDayNumber.invalid) {
+                <span class="field-error">Enter a value between 1 and 23</span>
+              }
+            </div>
+          }
+          @case (SalaryScheduleMode.FixedDate) {
+            <div class="form-group">
+              <label for="fixedDay">Day of Month (1-31)</label>
+              <input id="fixedDay" type="number" formControlName="fixedDay"
+                placeholder="e.g. 25" min="1" max="31" step="1">
+              @if (form.controls.fixedDay.touched && form.controls.fixedDay.invalid) {
+                <span class="field-error">Enter a value between 1 and 31</span>
+              }
+            </div>
+          }
+          @case (SalaryScheduleMode.FixedDateSplit) {
+            <div class="form-group">
+              <label for="fixedDaySplit">Day of Month (1-31)</label>
+              <input id="fixedDaySplit" type="number" formControlName="fixedDay"
+                placeholder="e.g. 25" min="1" max="31" step="1">
+              @if (form.controls.fixedDay.touched && form.controls.fixedDay.invalid) {
+                <span class="field-error">Enter a value between 1 and 31</span>
+              }
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="splitFirstAmount">First Split Amount</label>
+                <input id="splitFirstAmount" type="number" formControlName="splitFirstAmount"
+                  placeholder="0.00" step="0.01" min="0.01">
+              </div>
+              <div class="form-group">
+                <label for="splitFirstPercentage">Or First Split %</label>
+                <input id="splitFirstPercentage" type="number" formControlName="splitFirstPercentage"
+                  placeholder="e.g. 40" step="0.01" min="0.01" max="100">
+              </div>
+            </div>
+            <p class="hint">Provide either an amount or a percentage, not both.</p>
+          }
+        }
+      </div>
+    }
+
+    <button type="submit" [disabled]="submitting()">
+      @if (submitting()) {
+        Creating...
+      } @else {
+        Create Transaction
+      }
+    </button>
+  </form>
+</div>
